@@ -59,6 +59,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 //        classificationRequest.imageCropAndScaleOption = VNImageCropAndScaleOption.centerCrop // Crop from centre of images and scale to appropriate size.
 //        visionRequests = [classificationRequest]
         
+        // Setup detection of rectangles in CoreML
+        let rectDetectionRequest = VNDetectRectanglesRequest(completionHandler: rectangleDetectionHandler)
+        rectDetectionRequest.maximumObservations = 1
+        rectDetectionRequest.minimumConfidence = 1.0
+        visionRequests = [rectDetectionRequest]
+        
         // Begin Loop to Update CoreML
         loopCoreMLUpdate()
     }
@@ -175,6 +181,21 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             self.loopCoreMLUpdate()
         }
         
+    }
+    
+    func rectangleDetectionHandler(request: VNRequest, error: Error?) {
+         // Catch Errors
+        if error != nil {
+            print("Error: " + (error?.localizedDescription)!)
+            return
+        }
+        
+        guard let observations = request.results else {
+            print("No results")
+            return
+        }
+        
+        observations.forEach({print($0)})
     }
     
 //    func classificationCompleteHandler(request: VNRequest, error: Error?) {
