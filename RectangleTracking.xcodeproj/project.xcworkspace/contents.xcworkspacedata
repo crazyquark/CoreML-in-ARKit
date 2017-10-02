@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:CoreML in ARKit.xcodeproj">
+      location = "self:/Users/cristias/Desktop/Workspace/CoreML-in-ARKit/RectangleTracking.xcodeproj">
    </FileRef>
 </Workspace>

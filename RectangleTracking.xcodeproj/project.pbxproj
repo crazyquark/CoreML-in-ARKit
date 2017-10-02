@@ -17,7 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		AEEC85611F18B8C600D43B9B /* CoreML in ARKit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "CoreML in ARKit.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		AEEC85611F18B8C600D43B9B /* RectangleTracking.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RectangleTracking.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AEEC85641F18B8C600D43B9B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AEEC85661F18B8C600D43B9B /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
 		AEEC85681F18B8C600D43B9B /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -42,7 +42,7 @@
 		AEEC85581F18B8C600D43B9B = {
 			isa = PBXGroup;
 			children = (
-				AEEC85631F18B8C600D43B9B /* CoreML in ARKit */,
+				AEEC85631F18B8C600D43B9B /* RectangleTracking */,
 				AEEC85621F18B8C600D43B9B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -50,12 +50,12 @@
 		AEEC85621F18B8C600D43B9B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AEEC85611F18B8C600D43B9B /* CoreML in ARKit.app */,
+				AEEC85611F18B8C600D43B9B /* RectangleTracking.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		AEEC85631F18B8C600D43B9B /* CoreML in ARKit */ = {
+		AEEC85631F18B8C600D43B9B /* RectangleTracking */ = {
 			isa = PBXGroup;
 			children = (
 				B83110221F8281260053D0A7 /* UIView+Extensions.swift */,
@@ -67,15 +67,15 @@
 				AEEC856F1F18B8C600D43B9B /* LaunchScreen.storyboard */,
 				AEEC85721F18B8C600D43B9B /* Info.plist */,
 			);
-			path = "CoreML in ARKit";
+			path = RectangleTracking;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		AEEC85601F18B8C600D43B9B /* CoreML in ARKit */ = {
+		AEEC85601F18B8C600D43B9B /* RectangleTracking */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AEEC85751F18B8C600D43B9B /* Build configuration list for PBXNativeTarget "CoreML in ARKit" */;
+			buildConfigurationList = AEEC85751F18B8C600D43B9B /* Build configuration list for PBXNativeTarget "RectangleTracking" */;
 			buildPhases = (
 				AEEC855D1F18B8C600D43B9B /* Sources */,
 				AEEC855E1F18B8C600D43B9B /* Frameworks */,
@@ -85,9 +85,9 @@
 			);
 			dependencies = (
 			);
-			name = "CoreML in ARKit";
+			name = RectangleTracking;
 			productName = "CoreML in ARKit";
-			productReference = AEEC85611F18B8C600D43B9B /* CoreML in ARKit.app */;
+			productReference = AEEC85611F18B8C600D43B9B /* RectangleTracking.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -105,7 +105,7 @@
 					};
 				};
 			};
-			buildConfigurationList = AEEC855C1F18B8C600D43B9B /* Build configuration list for PBXProject "CoreML in ARKit" */;
+			buildConfigurationList = AEEC855C1F18B8C600D43B9B /* Build configuration list for PBXProject "RectangleTracking" */;
 			compatibilityVersion = "Xcode 8.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -118,7 +118,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				AEEC85601F18B8C600D43B9B /* CoreML in ARKit */,
+				AEEC85601F18B8C600D43B9B /* RectangleTracking */,
 			);
 		};
 /* End PBXProject section */
@@ -308,7 +308,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AEEC855C1F18B8C600D43B9B /* Build configuration list for PBXProject "CoreML in ARKit" */ = {
+		AEEC855C1F18B8C600D43B9B /* Build configuration list for PBXProject "RectangleTracking" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AEEC85731F18B8C600D43B9B /* Debug */,
@@ -317,7 +317,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AEEC85751F18B8C600D43B9B /* Build configuration list for PBXNativeTarget "CoreML in ARKit" */ = {
+		AEEC85751F18B8C600D43B9B /* Build configuration list for PBXNativeTarget "RectangleTracking" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AEEC85761F18B8C600D43B9B /* Debug */,
