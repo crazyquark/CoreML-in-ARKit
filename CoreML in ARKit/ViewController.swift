@@ -16,8 +16,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     // SCENE
     @IBOutlet var sceneView: ARSCNView!
-    let bubbleDepth : Float = 0.01 // the 'depth' of 3D text
-    var latestPrediction : String = "…" // a variable containing the latest CoreML prediction
+    var lastDetectedRectangle : VNRectangleObservation?
+    
+    // Displayed rectangle outline
+    private var selectedRectangleOutlineLayer: CAShapeLayer?
     
     // COREML
     var visionRequests = [VNRequest]()
@@ -44,8 +46,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         //////////////////////////////////////////////////
         // Tap Gesture Recognizer
-//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.handleTap(gestureRecognize:)))
-//        view.addGestureRecognizer(tapGesture)
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.handleTap(gestureRecognize:)))
+        view.addGestureRecognizer(tapGesture)
         
         //////////////////////////////////////////////////
         
@@ -107,6 +109,36 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     // MARK: - Interaction
+    
+    @objc func handleTap(gestureRecognize: UITapGestureRecognizer) {
+        guard let rectangle = self.lastDetectedRectangle else {
+            return
+        }
+        
+        self.drawRectangleOnScreen(rectangle)
+    }
+    
+    private func drawRectangleOnScreen(_ rectangle: VNRectangleObservation) {
+        let points = [rectangle.topLeft, rectangle.topRight, rectangle.bottomRight, rectangle.bottomLeft]
+        let convertedPoints = points.map { self.sceneView.convertFromCamera($0) }
+        self.selectedRectangleOutlineLayer = self.drawPolygon(convertedPoints, color: UIColor.green)
+        
+        self.sceneView.layer.addSublayer(self.selectedRectangleOutlineLayer!)
+    }
+    
+    private func drawPolygon(_ points: [CGPoint], color: UIColor) -> CAShapeLayer {
+        let layer = CAShapeLayer()
+        layer.fillColor = nil
+        layer.strokeColor = color.cgColor
+        layer.lineWidth = 2
+        let path = UIBezierPath()
+        path.move(to: points.last!)
+        points.forEach { point in
+            path.addLine(to: point)
+        }
+        layer.path = path.cgPath
+        return layer
+    }
     
 //    @objc func handleTap(gestureRecognize: UITapGestureRecognizer) {
 //        // HIT TEST : REAL WORLD
@@ -191,49 +223,28 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
         
         guard let observations = request.results else {
-            print("No results")
             return
         }
         
-        observations.forEach({print($0)})
+        let rectangleObservations = observations
+            .flatMap({ $0 as? VNRectangleObservation })
+            .map({ "\([$0.topLeft, $0.bottomRight]) \(String(format:"- %.2f", $0.confidence))" })
+            .joined(separator: "\n")
+        
+        DispatchQueue.main.async {
+            // Print detections
+            print(rectangleObservations)
+            print("--")
+
+            // Display Debug Text on screen
+            var debugText:String = ""
+            debugText += rectangleObservations
+            self.debugTextView.text = debugText
+
+            // Store the latest prediction if available
+            self.lastDetectedRectangle = observations.first as? VNRectangleObservation
+        }
     }
-    
-//    func classificationCompleteHandler(request: VNRequest, error: Error?) {
-//        // Catch Errors
-//        if error != nil {
-//            print("Error: " + (error?.localizedDescription)!)
-//            return
-//        }
-//        guard let observations = request.results else {
-//            print("No results")
-//            return
-//        }
-//
-//        // Get Classifications
-//        let classifications = observations[0...1] // top 2 results
-//            .flatMap({ $0 as? VNClassificationObservation })
-//            .map({ "\($0.identifier) \(String(format:"- %.2f", $0.confidence))" })
-//            .joined(separator: "\n")
-//
-//
-//        DispatchQueue.main.async {
-//            // Print Classifications
-//            print(classifications)
-//            print("--")
-//
-//            // Display Debug Text on screen
-//            var debugText:String = ""
-//            debugText += classifications
-//            self.debugTextView.text = debugText
-//
-//            // Store the latest prediction
-//            var objectName:String = "…"
-//            objectName = classifications.components(separatedBy: "-")[0]
-//            objectName = objectName.components(separatedBy: ",")[0]
-//            self.latestPrediction = objectName
-//
-//        }
-//    }
     
     func updateCoreML() {
         ///////////////////////////
@@ -260,10 +271,3 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
 }
 
-extension UIFont {
-    // Based on: https://stackoverflow.com/questions/4713236/how-do-i-set-bold-and-italic-on-uilabel-of-iphone-ipad
-    func withTraits(traits:UIFontDescriptorSymbolicTraits...) -> UIFont {
-        let descriptor = self.fontDescriptor.withSymbolicTraits(UIFontDescriptorSymbolicTraits(traits))
-        return UIFont(descriptor: descriptor!, size: 0)
-    }
-}
