@@ -122,7 +122,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     private func drawPolygon(_ points: [CGPoint], color: UIColor) -> CAShapeLayer {
         let layer = CAShapeLayer()
-        layer.fillColor = nil
+        layer.fillColor = color.cgColor
         layer.strokeColor = color.cgColor
         layer.lineWidth = 2
         let path = UIBezierPath()
