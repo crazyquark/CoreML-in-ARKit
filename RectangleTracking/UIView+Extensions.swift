@@ -13,6 +13,7 @@ extension UIView {
     
     // Converts a point from camera coordinates (0 to 1 or -1 to 0, depending on orientation)
     // into a point within the given view
+    // Needs to run on the main thread
     func convertFromCamera(_ point: CGPoint) -> CGPoint {
         let orientation = UIApplication.shared.statusBarOrientation
         

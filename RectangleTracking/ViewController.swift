@@ -215,24 +215,26 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             self.visionRequests.append(trackRequest)
             
             // Let's compute the center of the rectangle
-            let midpoint = CGPoint(x: (rectangle.bottomRight.x - rectangle.topLeft.x) / 2.0, y: (rectangle.bottomRight.y - rectangle.topLeft.y) / 2.0)
+            let midpoint = CGPoint(x: (rectangle.bottomRight.x + rectangle.topLeft.x) / 2.0, y: (rectangle.bottomRight.y + rectangle.topLeft.y) / 2.0)
             
-            // Let's transpose this in 3D
-            let arHitTestResults : [ARHitTestResult] = (self.sceneView.hitTest(midpoint, types: [.featurePoint]))
-            
-            if let closestResult = arHitTestResults.first {
-                let transform : matrix_float4x4 = closestResult.worldTransform
-                let worldCoord : SCNVector3 = SCNVector3Make(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
+            DispatchQueue.main.sync {
+                // Let's transpose this in 3D
+                let arHitTestResults : [ARHitTestResult] = (self.sceneView.hitTest(self.sceneView.convertFromCamera(midpoint), types: [.featurePoint]))
                 
-                // Update node
-                let newNode = create3Dobj(worldCoord)
-                if let oldNode = self.currentSceneNode {
-                    self.sceneView.scene.rootNode.replaceChildNode(oldNode, with: newNode)
-                } else {
-                    self.sceneView.scene.rootNode.addChildNode(newNode)
+                if let closestResult = arHitTestResults.first {
+                    let transform : matrix_float4x4 = closestResult.worldTransform
+                    let worldCoord : SCNVector3 = SCNVector3Make(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
+                    
+                    // Update node
+                    let newNode = create3Dobj(worldCoord)
+                    if let oldNode = self.currentSceneNode {
+                        self.sceneView.scene.rootNode.replaceChildNode(oldNode, with: newNode)
+                    } else {
+                        self.sceneView.scene.rootNode.addChildNode(newNode)
+                    }
+                    
+                    self.currentSceneNode = newNode
                 }
-                
-                self.currentSceneNode = newNode
             }
         }
         
