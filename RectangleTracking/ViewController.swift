@@ -148,13 +148,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     func create3Dobj(_ position: SCNVector3) -> SCNNode {
-        let sphere = SCNSphere(radius: 0.005)
-        sphere.firstMaterial?.diffuse.contents = UIColor.orange
-        let sphereNode = SCNNode(geometry: sphere)
+        let coin = SCNCylinder(radius: 0.005, height: 0.0025)
+        coin.firstMaterial?.diffuse.contents = UIColor.orange
+        let node = SCNNode(geometry: coin)
         
-        sphereNode.position = position
+        node.position = position
         
-        return sphereNode
+        return node
     }
     
     private func drawPolygon(_ points: [CGPoint], color: UIColor) -> CAShapeLayer {
