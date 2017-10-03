@@ -22,6 +22,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     // Displayed rectangle outline
     private var selectedRectangleOutlineLayer: CAShapeLayer?
     
+    // Current 3D object
+    private var currentSceneNode: SCNNode?
+    
     // COREML
     private var observedRectangle : VNRectangleObservation?
     private var visionRequests = [VNRequest]()
@@ -98,7 +101,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
         DispatchQueue.main.async {
             // Draw detected rectangle
-            self.drawRectangleOnScreen()
+            self.drawElementsInAR()
         }
     }
     
@@ -119,7 +122,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         self.visionRequests.append(rectDetectionRequest!)
     }
     
-    private func drawRectangleOnScreen() {
+    private func drawElementsInAR() {
         // Remove previous layers
         self.sceneView.layer.sublayers?.removeAll()
         
@@ -127,11 +130,22 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             return
         }
         
+        // Recognition rectangle for debugging for now
         let points = [rectangle.topLeft, rectangle.topRight, rectangle.bottomRight, rectangle.bottomLeft]
         let convertedPoints = points.map { self.sceneView.convertFromCamera($0) }
         self.selectedRectangleOutlineLayer = self.drawPolygon(convertedPoints, color: UIColor.green)
         
         self.sceneView.layer.addSublayer(self.selectedRectangleOutlineLayer!)
+    }
+    
+    func create3Dobj(_ position: SCNVector3) -> SCNNode {
+        let sphere = SCNSphere(radius: 0.005)
+        sphere.firstMaterial?.diffuse.contents = UIColor.orange
+        let sphereNode = SCNNode(geometry: sphere)
+        
+        sphereNode.position = position
+        
+        return sphereNode
     }
     
     private func drawPolygon(_ points: [CGPoint], color: UIColor) -> CAShapeLayer {
@@ -180,16 +194,37 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             .joined(separator: "\n")
         
         // Did we detect rectangle?
-        if let observation = observations.first as? VNRectangleObservation {
-            self.observedRectangle = observation
+        if let rectangle = observations.first as? VNRectangleObservation {
+            self.observedRectangle = rectangle
             
             // Remove the detect request
             self.visionRequests.remove(at: 0)
             
             // Add a track request instead
-            let trackRequest = VNTrackRectangleRequest(rectangleObservation: observation, completionHandler: self.rectangleDetectionHandler)
+            let trackRequest = VNTrackRectangleRequest(rectangleObservation: rectangle, completionHandler: self.rectangleDetectionHandler)
             trackRequest.trackingLevel = .accurate
             self.visionRequests.append(trackRequest)
+            
+            // Let's compute the center of the rectangle
+            let midPoint2D = CGPoint(x: (rectangle.topLeft.x - rectangle.bottomRight.x) / 2.0, y: (rectangle.topLeft.y - rectangle.bottomRight.y) / 2.0)
+            // Let's transpose this in 3D
+            
+            let arHitTestResults : [ARHitTestResult] = self.sceneView.hitTest(midPoint2D, types: [.featurePoint])
+            if let closestResult = arHitTestResults.first {
+                let transform : matrix_float4x4 = closestResult.worldTransform
+                let worldCoord : SCNVector3 = SCNVector3Make(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
+                
+                
+                // Update node
+                let newNode = create3Dobj(worldCoord)
+                if let oldNode = self.currentSceneNode {
+                    self.sceneView.scene.rootNode.replaceChildNode(oldNode, with: newNode)
+                } else {
+                    self.sceneView.scene.rootNode.addChildNode(newNode)
+                }
+                
+                self.currentSceneNode = newNode
+            }
         }
         
         DispatchQueue.main.async {
