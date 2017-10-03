@@ -16,14 +16,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     // SCENE
     @IBOutlet var sceneView: ARSCNView!
-    var lastDetectedRectangle : VNRectangleObservation?
+    private var observedRectangle : VNRectangleObservation?
     
     // Displayed rectangle outline
     private var selectedRectangleOutlineLayer: CAShapeLayer?
     
     // COREML
-    var visionRequests = [VNRequest]()
-    let dispatchQueueML = DispatchQueue(label: "com.hw.dispatchqueueml") // A Serial Queue
+    private var visionRequests = [VNRequest]()
+    private let dispatchQueueML = DispatchQueue(label: "com.hw.dispatchqueueml") // A Serial Queue
+    private var rectDetectionRequest : VNDetectRectanglesRequest?
+    private let visionSequenceHandler = VNSequenceRequestHandler()
+    
     @IBOutlet weak var debugTextView: UITextView!
     
     override func viewDidLoad() {
@@ -51,13 +54,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         //////////////////////////////////////////////////
         
-        // Setup detection of rectangles in CoreML
-        let rectDetectionRequest = VNDetectRectanglesRequest(completionHandler: rectangleDetectionHandler)
-        rectDetectionRequest.maximumObservations = 1
-        rectDetectionRequest.minimumConfidence = 1.0
-        visionRequests = [rectDetectionRequest]
-        
         // Begin Loop to Update CoreML
+        self.rectDetectionRequest = VNDetectRectanglesRequest(completionHandler: rectangleDetectionHandler)
+        rectDetectionRequest!.maximumObservations = 1
+        rectDetectionRequest!.minimumConfidence = 1.0
+        
         loopCoreMLUpdate()
     }
     
@@ -102,14 +103,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     // MARK: - Interaction
     
     @objc func handleTap(gestureRecognize: UITapGestureRecognizer) {
+        // Seed detector anew
+        self.visionRequests.removeAll()
         
+        self.visionRequests.append(rectDetectionRequest!)
     }
     
     private func drawRectangleOnScreen() {
         // Remove previous layers
         self.sceneView.layer.sublayers?.removeAll()
         
-        guard let rectangle = self.lastDetectedRectangle else {
+        guard let rectangle = self.observedRectangle else {
             return
         }
         
@@ -150,7 +154,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     private func rectangleDetectionHandler(request: VNRequest, error: Error?) {
-         // Catch Errors
+        // Catch Errors
         if error != nil {
             print("Error: " + (error?.localizedDescription)!)
             return
@@ -165,6 +169,19 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             .map({ "\([$0.topLeft, $0.bottomRight]) \(String(format:"- %.2f", $0.confidence))" })
             .joined(separator: "\n")
         
+        // Did we detect rectangle?
+        if let observation = observations.first as? VNRectangleObservation {
+            self.observedRectangle = observation
+            
+            // Remove the detect request
+            self.visionRequests.remove(at: 0)
+            
+            // Add a track request instead
+            let trackRequest = VNTrackRectangleRequest(rectangleObservation: observation, completionHandler: self.rectangleDetectionHandler)
+            trackRequest.trackingLevel = .accurate
+            self.visionRequests.append(trackRequest)
+        }
+        
         DispatchQueue.main.async {
             // Print detections
             print(rectangleObservations)
@@ -174,9 +191,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             var debugText:String = ""
             debugText += rectangleObservations
             self.debugTextView.text = debugText
-
-            // Store the latest prediction if available
-            self.lastDetectedRectangle = observations.first as? VNRectangleObservation
         }
     }
     
@@ -185,19 +199,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Get Camera Image as RGB
         let pixbuff : CVPixelBuffer? = (sceneView.session.currentFrame?.capturedImage)
         if pixbuff == nil { return }
-        let ciImage = CIImage(cvPixelBuffer: pixbuff!)
+        //  let ciImage = CIImage(cvPixelBuffer: pixbuff!)
         // Note: Not entirely sure if the ciImage is being interpreted as RGB, but for now it works with the Inception model.
         // Note2: Also uncertain if the pixelBuffer should be rotated before handing off to Vision (VNImageRequestHandler) - regardless, for now, it still works well with the Inception model.
         
         ///////////////////////////
         // Prepare CoreML/Vision Request
-        let imageRequestHandler = VNImageRequestHandler(ciImage: ciImage, options: [:])
         // let imageRequestHandler = VNImageRequestHandler(cgImage: cgImage!, orientation: myOrientation, options: [:]) // Alternatively; we can convert the above to an RGB CGImage and use that. Also UIInterfaceOrientation can inform orientation values.
         
         ///////////////////////////
         // Run Image Request
         do {
-            try imageRequestHandler.perform(self.visionRequests)
+            try self.visionSequenceHandler.perform(self.visionRequests, on: pixbuff!)
         } catch {
             print(error)
         }
