@@ -64,6 +64,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         rectDetectionRequest!.maximumObservations = 1
         rectDetectionRequest!.minimumConfidence = 1.0
         
+        // TODO: tweak focus
+        // self.sceneView.scene.rootNode.camera?.focalLength = 1/10
+        
         loopCoreMLUpdate()
     }
     
@@ -96,13 +99,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     @IBAction func confidenceSliderChanged(_ sender: Any) {
         self.confidenceLabel.text = String(format: "Confidence: %.2f", self.accuracyControl.value)
     }
-    // MARK: - ARSCNViewDelegate
     
-    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
-        DispatchQueue.main.async {
-            // Draw detected rectangle
-            self.drawElementsInAR()
-        }
+    // MARK: - AR
+    func session(_ session: ARSession, cameraDidChangeTrackingState camera: ARCamera) {
+        
     }
     
     // MARK: - Status Bar: Hide
@@ -120,6 +120,15 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         rectDetectionRequest!.minimumConfidence = accuracyControl.value
         
         self.visionRequests.append(rectDetectionRequest!)
+    }
+    
+    // MARK: - Rendering
+    
+    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
+        DispatchQueue.main.async {
+            // Draw detected rectangle
+            self.drawElementsInAR()
+        }
     }
     
     private func drawElementsInAR() {
@@ -206,14 +215,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             self.visionRequests.append(trackRequest)
             
             // Let's compute the center of the rectangle
-            let midPoint2D = CGPoint(x: (rectangle.topLeft.x - rectangle.bottomRight.x) / 2.0, y: (rectangle.topLeft.y - rectangle.bottomRight.y) / 2.0)
-            // Let's transpose this in 3D
+            let midpoint = CGPoint(x: (rectangle.bottomRight.x - rectangle.topLeft.x) / 2.0, y: (rectangle.bottomRight.y - rectangle.topLeft.y) / 2.0)
             
-            let arHitTestResults : [ARHitTestResult] = self.sceneView.hitTest(midPoint2D, types: [.featurePoint])
+            // Let's transpose this in 3D
+            let arHitTestResults : [ARHitTestResult] = (self.sceneView.hitTest(midpoint, types: [.featurePoint]))
+            
             if let closestResult = arHitTestResults.first {
                 let transform : matrix_float4x4 = closestResult.worldTransform
                 let worldCoord : SCNVector3 = SCNVector3Make(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
-                
                 
                 // Update node
                 let newNode = create3Dobj(worldCoord)
