@@ -12,7 +12,7 @@
         <!--View Controller-->
         <scene sceneID="tXr-a1-R10">
             <objects>
-                <viewController id="BV1-FR-VrT" customClass="ViewController" customModule="CoreML_in_ARKit" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BV1-FR-VrT" customClass="ViewController" customModule="RectangleTracking" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="tix-nH-sfG">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -30,20 +30,39 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
+                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="1" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="hDg-l6-NMX">
+                                <rect key="frame" x="16" y="616" width="345" height="31"/>
+                                <connections>
+                                    <action selector="confidenceSliderChanged:" destination="BV1-FR-VrT" eventType="valueChanged" id="iGD-Wy-QH3"/>
+                                </connections>
+                            </slider>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Confidence" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cZg-4b-Sff">
+                                <rect key="frame" x="18" y="587" width="88" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="hWs-m5-HIX" firstAttribute="trailing" secondItem="W2V-Gj-Pwx" secondAttribute="trailing" id="Pop-CU-HNn"/>
+                            <constraint firstItem="W2V-Gj-Pwx" firstAttribute="trailing" secondItem="hDg-l6-NMX" secondAttribute="trailing" constant="16" id="Q6D-fl-lLS"/>
                             <constraint firstItem="hWs-m5-HIX" firstAttribute="leading" secondItem="W2V-Gj-Pwx" secondAttribute="leading" id="bYb-Zu-hM1"/>
                             <constraint firstItem="XMs-gA-sya" firstAttribute="trailing" secondItem="W2V-Gj-Pwx" secondAttribute="trailing" id="bg6-Jm-8Wb"/>
                             <constraint firstItem="XMs-gA-sya" firstAttribute="leading" secondItem="W2V-Gj-Pwx" secondAttribute="leading" id="fgq-Rs-G2A"/>
+                            <constraint firstItem="cZg-4b-Sff" firstAttribute="leading" secondItem="W2V-Gj-Pwx" secondAttribute="leading" constant="18" id="h33-zn-0aG"/>
                             <constraint firstItem="hWs-m5-HIX" firstAttribute="top" secondItem="tix-nH-sfG" secondAttribute="top" id="hFg-7r-eMc"/>
+                            <constraint firstItem="hDg-l6-NMX" firstAttribute="top" secondItem="cZg-4b-Sff" secondAttribute="bottom" constant="8" id="l1F-cj-gix"/>
+                            <constraint firstItem="W2V-Gj-Pwx" firstAttribute="bottom" secondItem="hDg-l6-NMX" secondAttribute="bottom" constant="21" id="qEB-hQ-dyo"/>
+                            <constraint firstItem="hDg-l6-NMX" firstAttribute="leading" secondItem="W2V-Gj-Pwx" secondAttribute="leading" constant="18" id="sox-dK-6Pc"/>
                             <constraint firstItem="XMs-gA-sya" firstAttribute="top" secondItem="tix-nH-sfG" secondAttribute="top" id="vHp-rp-JQw"/>
                             <constraint firstItem="XMs-gA-sya" firstAttribute="bottom" secondItem="W2V-Gj-Pwx" secondAttribute="bottom" id="zam-8D-9DF"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="W2V-Gj-Pwx"/>
                     </view>
                     <connections>
+                        <outlet property="accuracyControl" destination="hDg-l6-NMX" id="2YY-Xo-zUK"/>
+                        <outlet property="confidenceLabel" destination="cZg-4b-Sff" id="hCo-JY-t3F"/>
                         <outlet property="debugTextView" destination="hWs-m5-HIX" id="aW0-YQ-CNv"/>
                         <outlet property="sceneView" destination="XMs-gA-sya" id="uz8-4k-aSX"/>
                     </connections>

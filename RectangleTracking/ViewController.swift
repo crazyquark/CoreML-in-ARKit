@@ -16,12 +16,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     // SCENE
     @IBOutlet var sceneView: ARSCNView!
-    private var observedRectangle : VNRectangleObservation?
+    @IBOutlet weak var accuracyControl: UISlider!
+    @IBOutlet weak var confidenceLabel: UILabel!
     
     // Displayed rectangle outline
     private var selectedRectangleOutlineLayer: CAShapeLayer?
     
     // COREML
+    private var observedRectangle : VNRectangleObservation?
     private var visionRequests = [VNRequest]()
     private let dispatchQueueML = DispatchQueue(label: "com.hw.dispatchqueueml") // A Serial Queue
     private var rectDetectionRequest : VNDetectRectanglesRequest?
@@ -70,6 +72,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Enable plane detection
         configuration.planeDetection = .horizontal
         
+        self.confidenceLabel.text = String(format: "Confidence: %.2f", self.accuracyControl.value)
+        
         // Run the view's session
         sceneView.session.run(configuration)
     }
@@ -85,7 +89,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         super.didReceiveMemoryWarning()
         // Release any cached data, images, etc that aren't in use.
     }
-
+    
+    @IBAction func confidenceSliderChanged(_ sender: Any) {
+        self.confidenceLabel.text = String(format: "Confidence: %.2f", self.accuracyControl.value)
+    }
     // MARK: - ARSCNViewDelegate
     
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
@@ -105,6 +112,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     @objc func handleTap(gestureRecognize: UITapGestureRecognizer) {
         // Seed detector anew
         self.visionRequests.removeAll()
+        
+        // Adjust confidence
+        rectDetectionRequest!.minimumConfidence = accuracyControl.value
         
         self.visionRequests.append(rectDetectionRequest!)
     }
