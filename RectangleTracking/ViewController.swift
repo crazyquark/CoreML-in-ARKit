@@ -132,9 +132,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     private func drawElementsInAR() {
-        // Remove previous layers
-        self.sceneView.layer.sublayers?.removeAll()
-        
         guard let rectangle = self.observedRectangle else {
             return
         }
@@ -142,9 +139,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Recognition rectangle for debugging for now
         let points = [rectangle.topLeft, rectangle.topRight, rectangle.bottomRight, rectangle.bottomLeft]
         let convertedPoints = points.map { self.sceneView.convertFromCamera($0) }
-        self.selectedRectangleOutlineLayer = self.drawPolygon(convertedPoints, color: UIColor.green)
         
-        self.sceneView.layer.addSublayer(self.selectedRectangleOutlineLayer!)
+        if self.selectedRectangleOutlineLayer != nil {
+            self.updateLayer(convertedPoints, color: UIColor.green)
+        } else {
+            self.selectedRectangleOutlineLayer = createLayer(convertedPoints, color: UIColor.green)
+            self.sceneView.layer.addSublayer(self.selectedRectangleOutlineLayer!)
+        }
     }
     
     func create3Dobj(_ position: SCNVector3) -> SCNNode {
@@ -157,18 +158,34 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         return node
     }
     
-    private func drawPolygon(_ points: [CGPoint], color: UIColor) -> CAShapeLayer {
+    private func createLayer(_ points: [CGPoint], color: UIColor) -> CAShapeLayer {
         let layer = CAShapeLayer()
         layer.fillColor = nil
         layer.strokeColor = color.cgColor
         layer.lineWidth = 2
+        
         let path = UIBezierPath()
         path.move(to: points.last!)
         points.forEach { point in
             path.addLine(to: point)
         }
+        
         layer.path = path.cgPath
         return layer
+    }
+    
+    private func updateLayer(_ points: [CGPoint], color: UIColor) {
+        self.selectedRectangleOutlineLayer!.fillColor = nil
+        selectedRectangleOutlineLayer!.strokeColor = color.cgColor
+        selectedRectangleOutlineLayer!.lineWidth = 2
+        
+        let path = UIBezierPath()
+        path.move(to: points.last!)
+        points.forEach{ point in
+            path.addLine(to: point)
+        }
+        
+        selectedRectangleOutlineLayer!.path = path.cgPath
     }
     
     // MARK: - CoreML Vision Handling
