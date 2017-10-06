@@ -26,10 +26,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     private var currentSceneNode: SCNNode?
     
     // COREML
-    private var observedRectangle : VNRectangleObservation?
+    private var observedRectangle : VNBarcodeObservation?
     private var visionRequests = [VNRequest]()
     private let dispatchQueueML = DispatchQueue(label: "com.hw.dispatchqueueml") // A Serial Queue
-    private var rectDetectionRequest : VNDetectRectanglesRequest?
+    private var rectDetectionRequest : VNDetectBarcodesRequest?
     private let visionSequenceHandler = VNSequenceRequestHandler()
     
     @IBOutlet weak var debugTextView: UITextView!
@@ -60,9 +60,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         //////////////////////////////////////////////////
         
         // Begin Loop to Update CoreML
-        self.rectDetectionRequest = VNDetectRectanglesRequest(completionHandler: rectangleDetectionHandler)
-        rectDetectionRequest!.maximumObservations = 1
-        rectDetectionRequest!.minimumConfidence = 1.0
+        self.rectDetectionRequest = VNDetectBarcodesRequest(completionHandler: rectangleDetectionHandler)
+//        rectDetectionRequest!.maximumObservations = 1
+//        rectDetectionRequest!.minimumConfidence = 1.0
         
         // TODO: tweak focus
         // self.sceneView.scene.rootNode.camera?.focalLength = 1/10
@@ -117,7 +117,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         self.visionRequests.removeAll()
         
         // Adjust confidence
-        rectDetectionRequest!.minimumConfidence = accuracyControl.value
+//        rectDetectionRequest!.minimumConfidence = accuracyControl.value
         
         self.visionRequests.append(rectDetectionRequest!)
     }
@@ -220,14 +220,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             .joined(separator: "\n")
         
         // Did we detect rectangle?
-        if let rectangle = observations.first as? VNRectangleObservation {
+        if let rectangle = observations.first as? VNBarcodeObservation {
             self.observedRectangle = rectangle
             
             // Remove the detect request
             self.visionRequests.remove(at: 0)
             
             // Add a track request instead
-            let trackRequest = VNTrackRectangleRequest(rectangleObservation: rectangle, completionHandler: self.rectangleDetectionHandler)
+            let trackRequest = VNTrackObjectRequest(detectedObjectObservation: rectangle, completionHandler: self.rectangleDetectionHandler)
             trackRequest.trackingLevel = .accurate
             self.visionRequests.append(trackRequest)
             
