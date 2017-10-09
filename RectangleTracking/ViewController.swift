@@ -17,6 +17,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     @IBOutlet weak var sceneView: ARSCNView!
     
     var detectedDataAnchor: ARAnchor?
+    var detectedText: String?
     var processing = false
     
     // MARK: - View Setup
@@ -32,6 +33,9 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
+        
+        // Lighting ?
+        sceneView.autoenablesDefaultLighting = true
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -76,6 +80,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
             
             // Get the first result out of the results, if there are any
             if let results = request.results, let result = results.first as? VNBarcodeObservation {
+                // Get recognized text
+                self.detectedText = result.payloadStringValue
                 
                 // Get the bounding box for the bar code and find the center
                 var rect = result.boundingBox
@@ -99,6 +105,11 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
                         // If we already have an anchor, update the position of the attached node
                         if let detectedDataAnchor = self.detectedDataAnchor,
                             let node = self.sceneView.node(for: detectedDataAnchor) {
+                            
+                            // Update text
+                            if let text = node.childNodes[1].geometry as? SCNText {
+                                text.string = self.detectedText
+                            }
                             
                             node.transform = SCNMatrix4(hitTestResult.worldTransform)
                             
@@ -139,20 +150,52 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     // MARK: - ARSCNViewDelegate
     
     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-        
         // If this is our anchor, create a node
         if self.detectedDataAnchor?.identifier == anchor.identifier {
-            
-            let coin = SCNCylinder(radius: 0.03, height: 0.0025)
-            coin.firstMaterial?.diffuse.contents = UIColor.yellow
-            let node = SCNNode(geometry: coin)
-            
-            // Set its position based off the anchor
-            node.transform = SCNMatrix4(anchor.transform)
-            
-            return node
+            return create3Dobjects(at: anchor)
         }
         
         return nil
+    }
+    
+    func create3Dobjects(at: ARAnchor) -> SCNNode? {
+        let wrapperNode = SCNNode()
+        
+        // Lame coin cylinder for now
+        let coin = SCNCylinder(radius: 0.03, height: 0.0025)
+        coin.firstMaterial?.diffuse.contents = UIColor.blue
+        
+        let coinNode = SCNNode(geometry: coin)
+        coinNode.movabilityHint = .movable
+        coinNode.geometry?.firstMaterial?.lightingModel = .physicallyBased
+        
+        let textDepth = CGFloat(0.01)
+        let text = SCNText(string: self.detectedText , extrusionDepth: textDepth)
+        let font = UIFont(name: "Futura", size: 0.25)
+        text.font = font
+        text.alignmentMode = kCAAlignmentCenter
+        text.firstMaterial?.diffuse.contents = UIColor.green
+        text.firstMaterial?.specular.contents = UIColor.white
+        text.firstMaterial?.isDoubleSided = true
+        text.chamferRadius = textDepth
+        
+        // Centre Node - to Centre-Bottom point
+        let (minBound, maxBound) = text.boundingBox
+        let textNode = SCNNode(geometry: text)
+        textNode.pivot = SCNMatrix4MakeTranslation((maxBound.x - minBound.x) / 2, minBound.y, Float(textDepth / 2))
+        
+        textNode.scale = SCNVector3Make(0.1, 0.1, 0.1)
+        
+        let billboardConstraint = SCNBillboardConstraint()
+        billboardConstraint.freeAxes = SCNBillboardAxis.Y
+        
+        wrapperNode.addChildNode(coinNode)
+        wrapperNode.addChildNode(textNode)
+        wrapperNode.constraints = [billboardConstraint]
+        
+        // Set its position based off the anchor
+        wrapperNode.transform = SCNMatrix4(at.transform)
+        
+        return wrapperNode
     }
 }
