@@ -224,12 +224,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             self.observedRectangle = rectangle
             
             // Remove the detect request
-            self.visionRequests.remove(at: 0)
+//            self.visionRequests.remove(at: 0)
             
-            // Add a track request instead
-            let trackRequest = VNTrackObjectRequest(detectedObjectObservation: rectangle, completionHandler: self.rectangleDetectionHandler)
-            trackRequest.trackingLevel = .accurate
-            self.visionRequests.append(trackRequest)
+//            // Add a track request instead
+//            let trackRequest = VNTrackObjectRequest(detectedObjectObservation: rectangle, completionHandler: self.rectangleDetectionHandler)
+//            trackRequest.trackingLevel = .accurate
+//            self.visionRequests.append(trackRequest)
             
             // Let's compute the center of the rectangle
             let midpoint = CGPoint(x: (rectangle.bottomRight.x + rectangle.topLeft.x) / 2.0, y: (rectangle.bottomRight.y + rectangle.topLeft.y) / 2.0)
