@@ -162,7 +162,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         let wrapperNode = SCNNode()
         
         // Lame coin cylinder for now
-        let coin = SCNCylinder(radius: 0.03, height: 0.0025)
+        let coinHeight: Float = 0.005
+        let coin = SCNCylinder(radius: 0.03, height: CGFloat(coinHeight))
         coin.firstMaterial?.diffuse.contents = UIColor.blue
         
         let coinNode = SCNNode(geometry: coin)
@@ -182,7 +183,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         // Centre Node - to Centre-Bottom point
         let (minBound, maxBound) = text.boundingBox
         let textNode = SCNNode(geometry: text)
-        textNode.pivot = SCNMatrix4MakeTranslation((maxBound.x - minBound.x) / 2, minBound.y, Float(textDepth / 2))
+        textNode.pivot = SCNMatrix4MakeTranslation((maxBound.x - minBound.x) / 2.0, minBound.y, Float(textDepth / 2.0))
+        textNode.position = SCNVector3Make(0.0, 2 * coinHeight, 0.0)
         
         textNode.scale = SCNVector3Make(0.1, 0.1, 0.1)
         
