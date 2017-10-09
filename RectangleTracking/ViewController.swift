@@ -1,6 +1,6 @@
 //
 //  ViewController.swift
-//  CocoaHeadDemo
+//  RectangleTracking
 //
 //  Created by Jeff Meador on 6/26/17.
 //  Copyright © 2017 Vectorform. All rights reserved.
@@ -143,8 +143,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         // If this is our anchor, create a node
         if self.detectedDataAnchor?.identifier == anchor.identifier {
             
-            let coin = SCNCylinder(radius: 0.005, height: 0.0025)
-            coin.firstMaterial?.diffuse.contents = UIColor.orange
+            let coin = SCNCylinder(radius: 0.03, height: 0.0025)
+            coin.firstMaterial?.diffuse.contents = UIColor.yellow
             let node = SCNNode(geometry: coin)
             
             // Set its position based off the anchor
