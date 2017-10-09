@@ -32,9 +32,6 @@
                             </textView>
                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="1" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="hDg-l6-NMX">
                                 <rect key="frame" x="16" y="616" width="345" height="31"/>
-                                <connections>
-                                    <action selector="confidenceSliderChanged:" destination="BV1-FR-VrT" eventType="valueChanged" id="iGD-Wy-QH3"/>
-                                </connections>
                             </slider>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Confidence" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cZg-4b-Sff">
                                 <rect key="frame" x="18" y="587" width="88" height="21"/>
@@ -61,10 +58,7 @@
                         <viewLayoutGuide key="safeArea" id="W2V-Gj-Pwx"/>
                     </view>
                     <connections>
-                        <outlet property="accuracyControl" destination="hDg-l6-NMX" id="2YY-Xo-zUK"/>
-                        <outlet property="confidenceLabel" destination="cZg-4b-Sff" id="hCo-JY-t3F"/>
-                        <outlet property="debugTextView" destination="hWs-m5-HIX" id="aW0-YQ-CNv"/>
-                        <outlet property="sceneView" destination="XMs-gA-sya" id="uz8-4k-aSX"/>
+                        <outlet property="sceneView" destination="XMs-gA-sya" id="tqh-TI-ID0"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SZV-WD-TEh" sceneMemberID="firstResponder"/>
